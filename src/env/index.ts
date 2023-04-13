@@ -19,8 +19,23 @@ const envSchema = z.object({
 
 /*
 O método parse vai pegar o envSchema e passar os dados vindos do process.env e o zod vai fazer a validação
+
+parse dispara um erro caso a validação falhe
+safeParse não dispara um erro caso a validação falhe
 */
-export const env = envSchema.parse(process.env)
+
+const _env = envSchema.safeParse(process.env)
+
+// Fazendo a validação do método safeParse
+if (_env.success === false) {
+  // _env.error.format() -> vai formatar e mostrar onde que foi o erro
+  console.error('Invalid environment variables!', _env.error.format())
+
+  throw new Error('Invalid environment variables!')
+}
+
+// Passando pela validação, fazer o export do schema
+export const env = _env.data
 
 /* 
 Desta maneira, o typescript não vai acusar erro no arquivo de configurações do database, pois caso haja um erro, será tratado com um throw new Error pelo ZOD
