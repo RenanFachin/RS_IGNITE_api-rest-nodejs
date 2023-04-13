@@ -4,11 +4,11 @@ import { knex } from './database'
 const app = fastify()
 
 app.get('/hello', async () => {
-  // Testando a configuração do database
-  // Todo db possui uma tabela chamada sqlite_schema e dentro dela existe infos sobre as outras tabelas
-  const tables = await knex('sqlite_schema').select('*')
+  const transaction = await knex('transactions')
+    .where('amount', 500)
+    .select('*')
 
-  return tables
+  return transaction
 })
 
 app
