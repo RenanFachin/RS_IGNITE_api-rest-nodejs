@@ -1,8 +1,14 @@
 import fastify from 'fastify'
+import cookie from '@fastify/cookie'
+
 import { env } from './env'
 import { transactionsRoutes } from './routes/transactions'
 
 const app = fastify()
+
+// O cadastro dos cookies precisa acontecer antes das rotas
+// Cookies
+app.register(cookie)
 
 // PLUGIN
 app.register(transactionsRoutes, {

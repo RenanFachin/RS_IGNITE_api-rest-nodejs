@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify'
 import { z } from 'zod'
-import crypto from 'node:crypto'
+import crypto, { randomUUID } from 'node:crypto'
 import { knex } from '../database'
 
 // PLUGIN
@@ -58,6 +58,18 @@ export async function transactionsRoutes(app: FastifyInstance) {
       request.body,
     )
 
+    // Cookies
+    let sessionId = request.cookies.sessionId
+
+    if (!sessionId) {
+      sessionId = randomUUID()
+
+      response.cookie('sessionId', sessionId, {
+        path: '/',
+        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+      })
+    }
+
     // Criando a nova transação
     await knex('transactions').insert({
       id: crypto.randomUUID(),
@@ -65,6 +77,7 @@ export async function transactionsRoutes(app: FastifyInstance) {
       // Quando uma transação for cadastrada e o seu valor for do tipo crédito, quer dizer que o valor é positivo.
       // Caso seja do tipo débito, o valor é negativo
       amount: type === 'credit' ? amount : amount * -1,
+      session_id: sessionId,
     })
 
     return response.status(201).send()
