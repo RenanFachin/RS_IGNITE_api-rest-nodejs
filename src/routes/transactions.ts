@@ -6,6 +6,11 @@ import { checkSessionIdExists } from '../middleware/check-session-id-exists'
 
 // PLUGIN
 export async function transactionsRoutes(app: FastifyInstance) {
+  // Criando log do método e url
+  app.addHook('preHandler', async (request, response) => {
+    console.log(`[${request.method}] ${request.url}`)
+  })
+
   // Listar todas transações
   // preHandler vai lidar antes da request e response
   app.get(
