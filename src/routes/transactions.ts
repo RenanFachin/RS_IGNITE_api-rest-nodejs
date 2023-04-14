@@ -2,46 +2,78 @@ import { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import crypto, { randomUUID } from 'node:crypto'
 import { knex } from '../database'
+import { checkSessionIdExists } from '../middleware/check-session-id-exists'
 
 // PLUGIN
 export async function transactionsRoutes(app: FastifyInstance) {
   // Listar todas transações
-  app.get('/', async () => {
-    const transactions = await knex('transactions').select()
+  // preHandler vai lidar antes da request e response
+  app.get(
+    '/',
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (request, response) => {
+      const { sessionId } = request.cookies
 
-    return {
-      transactions,
-    }
-  })
+      const transactions = await knex('transactions')
+        .where('session_id', sessionId) // mostrando apenas as transações que tenham sessionId igual
+        .select()
+
+      return {
+        transactions,
+      }
+    },
+  )
 
   // Transação única
-  app.get('/:id', async (request) => {
-    // Criando uma validação de entrada para os request.params
-    const getTransactionParamsSchema = z.object({
-      id: z.string().uuid(),
-    })
+  app.get(
+    '/:id',
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (request) => {
+      // Criando uma validação de entrada para os request.params
+      const getTransactionParamsSchema = z.object({
+        id: z.string().uuid(),
+      })
 
-    const { id } = getTransactionParamsSchema.parse(request.params)
+      const { id } = getTransactionParamsSchema.parse(request.params)
 
-    // Buscando a primeira transação com este id no db
-    const transaction = await knex('transactions').where('id', id).first()
+      const { sessionId } = request.cookies
 
-    return {
-      transaction,
-    }
-  })
+      // Buscando a primeira transação com este id no db
+      const transaction = await knex('transactions')
+        .where('id', id)
+        .andWhere('session_id', sessionId)
+        .first()
+
+      return {
+        transaction,
+      }
+    },
+  )
 
   // Listando as transferências realizadas pelo usuário
-  app.get('/summary', async () => {
-    // método sum() => somar todos os campos de uma coluna
-    // .first() é para retonar como objeto e não array, que é o padrão do knex
+  app.get(
+    '/summary',
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (request) => {
+      const { sessionId } = request.cookies
 
-    const summary = await knex('transactions')
-      .sum('amount', { as: 'amount' }) // vai substituir o nome apenas para amount
-      .first()
+      // método sum() => somar todos os campos de uma coluna
+      // .first() é para retonar como objeto e não array, que é o padrão do knex
 
-    return { summary }
-  })
+      const summary = await knex('transactions')
+        .where('session_id', sessionId)
+        .sum('amount', { as: 'amount' }) // vai substituir o nome apenas para amount
+        .first()
+
+      return { summary }
+    },
+  )
 
   // Cria nova transação
   app.post('/', async (request, response) => {
