@@ -5,6 +5,33 @@ import { knex } from '../database'
 
 // PLUGIN
 export async function transactionsRoutes(app: FastifyInstance) {
+  // Listar todas transações
+  app.get('/', async () => {
+    const transactions = await knex('transactions').select()
+
+    return {
+      transactions,
+    }
+  })
+
+  // Transação única
+  app.get('/:id', async (request) => {
+    // Criando uma validação de entrada para os request.params
+    const getTransactionParamsSchema = z.object({
+      id: z.string().uuid(),
+    })
+
+    const { id } = getTransactionParamsSchema.parse(request.params)
+
+    // Buscando a primeira transação com este id no db
+    const transaction = await knex('transactions').where('id', id).first()
+
+    return {
+      transaction,
+    }
+  })
+
+  // Cria nova transação
   app.post('/', async (request, response) => {
     // o que esperamos receber do front: {title,amount, type: credit ou debit}
 
