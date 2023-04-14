@@ -31,6 +31,18 @@ export async function transactionsRoutes(app: FastifyInstance) {
     }
   })
 
+  // Listando as transferências realizadas pelo usuário
+  app.get('/summary', async () => {
+    // método sum() => somar todos os campos de uma coluna
+    // .first() é para retonar como objeto e não array, que é o padrão do knex
+
+    const summary = await knex('transactions')
+      .sum('amount', { as: 'amount' }) // vai substituir o nome apenas para amount
+      .first()
+
+    return { summary }
+  })
+
   // Cria nova transação
   app.post('/', async (request, response) => {
     // o que esperamos receber do front: {title,amount, type: credit ou debit}
