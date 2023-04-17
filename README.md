@@ -20,6 +20,8 @@ Este módulo consiste em desenvolver uma aplicação de transações (criar, lis
 
 Além disto, foram desenvolvidos testes end to end para testar as rotas da aplicação.
 
+Tópicos abordados: `ESModule`, `Typescript`, `ESLint`, `Banco de dados - Knex, migrations, querys`,`Variáveis de ambiente`,`Validação de dados - ZOD`, `Fastify - Plugins, cookies e prehandlers`, `Testes automatizados - Tipos de testes, vitest, supertest`, `Build do projeto - TSUP` e `Deploy da aplicação`
+
 
 ## Requisitos Funcionais
 
