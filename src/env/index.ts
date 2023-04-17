@@ -18,11 +18,15 @@ const envSchema = z.object({
   // enum => significa, uma entre as opções
   NODE_ENV: z.enum(['development', 'test', 'production']).default('production'),
 
+  // MODIFICAÇÃO PARA O DEPLOY (sqlite é em dev e postgreSQL(pg) é em prod)
+  DATABASE_CLIENT: z.enum(['sqlite', 'pg']),
+
   // DATABASE_URL é o que vem do process.env, ou seja, o que foi definido dentro de .env
   DATABASE_URL: z.string(),
 
   // Como PORT possui um valor default, não necessariamente ela precisa estar definida dentro do arquivo .env
-  PORT: z.number().default(3333),
+  // coerce => transforma o que for recebido em número
+  PORT: z.coerce.number().default(3333),
 })
 
 /*
