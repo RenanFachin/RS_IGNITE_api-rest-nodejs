@@ -30,4 +30,42 @@ describe('Transactions routes', () => {
     // Validação do teste
     expect(response.statusCode).toEqual(201)
   })
+
+  it('should be able to list all transactions', async () => {
+    // Para fazer a listagem de todas as transações é necessário ter um session_id
+    // Testes precisam se "excluir" de qualquer contexto externo, ou seja, depende de outro teste.
+    // Desta forma, para o teste de listar todas transações, devemos fazer primeiro a criação de uma transação
+
+    const createTransactionResponse = await supertestRequest(app.server)
+      .post('/transactions')
+      .send({
+        title: 'New transaction',
+        amount: 5000,
+        type: 'credit',
+      })
+
+    // Capturando o session_id dos cookies da requisição anterior
+    const cookies = createTransactionResponse.get('set-cookie')
+
+    // Fazendo a requisição, para de fato testar a listagem das transações
+    // .get é a rota
+    // .set é para enviar os cookies junto na requisição
+    // .expect é a validação do teste
+    const listTransactionsResponse = await supertestRequest(app.server)
+      .get('/transactions')
+      .set('Cookie', cookies)
+      .expect(200)
+
+    console.log(listTransactionsResponse.body) // apenas para verificação do que está sendo recebido
+
+    // validação do teste, como um todo
+    // "Espero que" o corpo da requisição criada de listar seja igual à um array contendo um objeto contendo title e amount
+    // id é gerado randomicamente e o type não fica salvo no db
+    expect(listTransactionsResponse.body.transactions).toEqual([
+      expect.objectContaining({
+        title: 'New transaction',
+        amount: 5000,
+      }),
+    ])
+  })
 })
