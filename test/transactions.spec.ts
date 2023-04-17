@@ -1,4 +1,5 @@
-import { it, expect, beforeAll, afterAll, describe } from 'vitest'
+import { it, expect, beforeAll, afterAll, describe, beforeEach } from 'vitest'
+import { execSync } from 'node:child_process' // executar scripts em paralelo
 import supertestRequest from 'supertest'
 import { app } from '../src/app'
 
@@ -13,6 +14,16 @@ describe('Transactions routes', () => {
   afterAll(async () => {
     // Removendo a aplicação da memória após a executação dos testes
     await app.close()
+  })
+
+  // Pq beforeEach? Para sempre manter o ambiente o mais limpo possível entre testes
+  beforeEach(async () => {
+    // execSync permite executar comandos no terminal por dentro da aplicação node
+
+    // 1: Executar um comando para limpar todas as tabelas de dentro da tabela test.db
+    execSync('npm run knex migrate:rollback --all')
+
+    execSync('npm run knex migrate:latest') // rodando a migration dentro da tabela de teste
   })
 
   it('should be able to create a new transaction', async () => {

@@ -1,3 +1,4 @@
 node_modules
 database/app.db
 .env
+.env.test

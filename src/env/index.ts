@@ -1,5 +1,15 @@
-import 'dotenv/config'
+import { config } from 'dotenv'
 import { z } from 'zod'
+
+// Validação do ambiente em que está sendo rodado o sv
+// O vitest automaticamente define node_env como test durante os testes
+if (process.env.NODE_ENV === 'test') {
+  config({
+    path: '.env.test', // buscando no '.env.test'
+  })
+} else {
+  config() // buscando no '.env'
+}
 
 // NODE_ENV é o ambiente: development, test, production
 
