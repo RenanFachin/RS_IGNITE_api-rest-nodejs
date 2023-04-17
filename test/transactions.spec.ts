@@ -113,4 +113,36 @@ describe('Transactions routes', () => {
       }),
     )
   })
+
+  it('should be able to get the summary', async () => {
+    const createTransactionResponse = await supertestRequest(app.server)
+      .post('/transactions')
+      .send({
+        title: 'Credit transaction',
+        amount: 5000,
+        type: 'credit',
+      })
+
+    const cookies = createTransactionResponse.get('set-cookie')
+
+    // Criando uma segunda transação, apenas para fins de deixar o teste mais fiel ao idealizado
+    await supertestRequest(app.server)
+      .post('/transactions')
+      .set('Cookie', cookies)
+      .send({
+        title: 'Debit transaction',
+        amount: 2000,
+        type: 'debit',
+      })
+
+    const summaryResponse = await supertestRequest(app.server)
+      .get('/transactions/summary')
+      .set('Cookie', cookies)
+      .expect(200)
+
+    // Validação do resumo, esperando ter um amount de 3000 (5000-2000)
+    expect(summaryResponse.body.summary).toEqual({
+      amount: 3000,
+    })
+  })
 })
