@@ -6,9 +6,7 @@ import { z } from 'zod'
 // Criando um schema de validação de variáveis de ambiente
 const envSchema = z.object({
   // enum => significa, uma entre as opções
-  NODE_ENV: z
-    .enum(['development', 'teste', 'production'])
-    .default('production'),
+  NODE_ENV: z.enum(['development', 'test', 'production']).default('production'),
 
   // DATABASE_URL é o que vem do process.env, ou seja, o que foi definido dentro de .env
   DATABASE_URL: z.string(),
