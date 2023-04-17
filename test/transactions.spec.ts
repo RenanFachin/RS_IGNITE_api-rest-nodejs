@@ -79,4 +79,38 @@ describe('Transactions routes', () => {
       }),
     ])
   })
+
+  it('should be able to get a specific transactions', async () => {
+    const createTransactionResponse = await supertestRequest(app.server)
+      .post('/transactions')
+      .send({
+        title: 'New transaction',
+        amount: 5000,
+        type: 'credit',
+      })
+
+    const cookies = createTransactionResponse.get('set-cookie')
+
+    const listTransactionsResponse = await supertestRequest(app.server)
+      .get('/transactions')
+      .set('Cookie', cookies)
+      .expect(200)
+
+    console.log(listTransactionsResponse.body)
+
+    // Como para fazer a listagem de uma transação específica é necessário passar o id desta transação, iremos capturar o id da transação criada
+    const transactionId = listTransactionsResponse.body.transactions[0].id
+
+    const getTransactionsResponse = await supertestRequest(app.server)
+      .get(`/transactions/${transactionId}`)
+      .set('Cookie', cookies)
+      .expect(200)
+
+    expect(getTransactionsResponse.body.transaction).toEqual(
+      expect.objectContaining({
+        title: 'New transaction',
+        amount: 5000,
+      }),
+    )
+  })
 })
