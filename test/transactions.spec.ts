@@ -117,6 +117,7 @@ describe('Transactions routes', () => {
   it('should be able to get the summary', async () => {
     const createTransactionResponse = await supertestRequest(app.server)
       .post('/transactions')
+      // .send envia dados em uma requisição HTTP
       .send({
         title: 'Credit transaction',
         amount: 5000,
